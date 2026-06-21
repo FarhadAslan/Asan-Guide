@@ -5,55 +5,68 @@ Vətəndaşların ASAN Xidmət mərkəzinə gəlmədən:
 - Lazımi sənədlər siyahısını öyrənməsi
 - Sənədlərini AI ilə yoxlaması
 
+> ⚠️ Bu sayt irəli sürülən ideya üçün bir prototipdir.
+
 ## Texnologiyalar
 
 - **Frontend:** React 18 + Vite + Tailwind CSS
-- **Backend:** Node.js + Express
-- **Verilənlər bazası:** MongoDB (istəyə bağlı)
-- **AI:** OpenAI GPT-4o (Vision + Chat)
+- **Backend:** Vercel Serverless Functions (Node.js)
+- **AI:** Groq API — Llama 3.3 70B + Llama 4 Scout (Vision)
 
-## Qurulum
+## Vercel Deploy
 
-### 1. Backend
+### 1. Repo-nu Vercel-ə qoş
 
+[vercel.com](https://vercel.com) → "New Project" → GitHub repo-nu seç
+
+### 2. Environment Variables əlavə et
+
+Vercel Dashboard → Project → Settings → Environment Variables:
+
+| Key | Value |
+|-----|-------|
+| `GROQ_API_KEY` | `gsk_...` |
+
+### 3. Deploy et
+
+Vercel avtomatik `vercel.json`-u oxuyub deploy edəcək.
+
+## Lokal İnkişaf
+
+### Backend (Express)
 ```bash
-cd asan-xidmet/backend
+cd backend
 npm install
-# .env faylında OPENAI_API_KEY əlavə edin
-npm run dev
+npm run dev        # http://localhost:5000
 ```
 
-### 2. Frontend
-
+### Frontend (Vite)
 ```bash
-cd asan-xidmet/frontend
+cd frontend
 npm install
-npm run dev
+npm run dev        # http://localhost:3000
 ```
 
-### 3. Brauzerdə aç
+## Layihə Strukturu
 
-- **İctimai sayt:** http://localhost:3000
-- **Admin panel:** http://localhost:3000/admin/login
-
-## Admin Giriş
-
-- İstifadəçi adı: `admin`
-- Şifrə: `admin123`
-
-## OpenAI API Açarı
-
-`backend/.env` faylında:
 ```
-OPENAI_API_KEY=sk-...
+/
+├── api/                    # Vercel Serverless Functions
+│   ├── data/services.js    # Statik xidmət datası
+│   ├── services.js         # GET /api/services
+│   ├── services/[slug].js  # GET /api/services/:slug
+│   └── ai/
+│       ├── chat.js         # POST /api/ai/chat
+│       └── check-document.js # POST /api/ai/check-document
+├── frontend/               # React + Vite app
+│   └── src/
+├── backend/                # Lokal dev üçün Express server
+├── vercel.json             # Vercel konfiqurasiyası
+└── package.json            # Root dependencies
 ```
 
-Açarsız da işləyir — **demo rejim** aktivdir.
+## Groq API Key
 
-## Xidmətlər
+[console.groq.com](https://console.groq.com) → API Keys → Create API Key
 
-Başlanğıc olaraq 2 xidmət mövcuddur:
-1. Şəxsiyyət Vəsiqəsinin Yenilənməsi
-2. Arxiv Arayışı
-
-Admin paneldən istənilən qədər xidmət əlavə etmək olar.
+Pulsuz tier: 1,000 sorğu/gün, kredit kartı tələb olunmur.

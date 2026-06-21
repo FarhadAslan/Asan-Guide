@@ -1,66 +1,69 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   body {
-    @apply font-sans text-gray-800 bg-asan-gray;
+    @apply font-sans text-gray-800 bg-asan-gray antialiased;
   }
 }
 
 @layer components {
   .btn-primary {
-    @apply bg-asan-blue text-white px-6 py-2.5 rounded-lg font-medium
-           hover:bg-asan-lightblue transition-colors duration-200
+    @apply bg-asan-blue text-white px-5 py-2.5 rounded-xl font-semibold text-sm
+           hover:bg-asan-lightblue transition-all duration-200
            focus:outline-none focus:ring-2 focus:ring-asan-blue focus:ring-offset-2
-           disabled:opacity-50 disabled:cursor-not-allowed;
+           disabled:opacity-50 disabled:cursor-not-allowed shadow-sm;
   }
 
   .btn-secondary {
-    @apply bg-white text-asan-blue border border-asan-blue px-6 py-2.5 rounded-lg
-           font-medium hover:bg-blue-50 transition-colors duration-200
+    @apply bg-white text-asan-blue border border-asan-blue/30 px-5 py-2.5 rounded-xl
+           font-semibold text-sm hover:bg-asan-sky hover:border-asan-blue
+           transition-all duration-200
            focus:outline-none focus:ring-2 focus:ring-asan-blue focus:ring-offset-2;
   }
 
   .card {
-    @apply bg-white rounded-xl shadow-sm border border-gray-100 p-6;
+    @apply bg-white rounded-2xl shadow-card border border-gray-100/80 p-6;
   }
 
   .badge {
     @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
   }
-}
-
-/* Scroll bar */
-::-webkit-scrollbar {
-  width: 6px;
-}
-::-webkit-scrollbar-track {
-  background: #f1f1f1;
-}
-::-webkit-scrollbar-thumb {
-  background: #003F87;
-  border-radius: 3px;
-}
 
   .form-input {
-    @apply w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm
-           focus:outline-none focus:border-asan-blue focus:ring-1 focus:ring-asan-blue
-           bg-white transition-colors;
+    @apply w-full px-4 py-3 border border-gray-200 rounded-xl text-sm
+           focus:outline-none focus:border-asan-blue focus:ring-2 focus:ring-asan-blue/10
+           bg-white transition-all;
   }
+}
 
-/* Animasiyalar */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+::-webkit-scrollbar-thumb { background: #003F87; border-radius: 10px; }
+
+/* Animations */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-
-.animate-fadeIn {
-  animation: fadeIn 0.3s ease-out;
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
-
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(16px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
 @keyframes pulse-ring {
-  0%   { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 63, 135, 0.4); }
-  70%  { transform: scale(1);    box-shadow: 0 0 0 10px rgba(0, 63, 135, 0); }
-  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 63, 135, 0); }
+  0%   { box-shadow: 0 0 0 0 rgba(0, 63, 135, 0.35); }
+  70%  { box-shadow: 0 0 0 10px rgba(0, 63, 135, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(0, 63, 135, 0); }
 }
+
+.animate-fadeIn     { animation: fadeIn 0.25s ease-out; }
+.animate-fadeInUp   { animation: fadeInUp 0.4s ease-out; }
+.animate-slideIn    { animation: slideIn 0.3s ease-out; }
