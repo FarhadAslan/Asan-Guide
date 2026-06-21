@@ -1,9 +1,8 @@
 const Groq = require('groq-sdk');
-const formidable = require('formidable');
-const fs = require('fs');
 const { seedServices } = require('../data/services');
 
-async function handler(req, res) {
+// Vercel default body size 4.5MB-dır, biz JSON base64 göndəririk
+module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -11,44 +10,25 @@ async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ message: 'Method not allowed' });
 
-  // Multipart parse
-  const form = formidable({
-    maxFileSize: 2 * 1024 * 1024,  // 2MB (Vercel 4.5MB limit altında)
-    keepExtensions: true,
-  });
-
-  let fields, files;
   try {
-    [fields, files] = await form.parse(req);
-  } catch (parseErr) {
-    return res.status(400).json({ message: 'Fayl oxuna bilmədi: ' + parseErr.message });
-  }
+    const { documentName, serviceSlug, validationRules, imageBase64, mimeType } = req.body || {};
 
-  const documentName    = (fields.documentName    || [''])[0];
-  const serviceSlug     = (fields.serviceSlug     || [''])[0];
-  const validationRules = (fields.validationRules || [''])[0];
-  const uploadedFile    = (files.document         || [])[0];
+    if (!imageBase64) {
+      return res.status(400).json({ message: 'Sənəd şəkli tapılmadı' });
+    }
 
-  if (!uploadedFile) return res.status(400).json({ message: 'Sənəd şəkli tapılmadı' });
+    const service = serviceSlug ? seedServices.find(s => s.slug === serviceSlug) : null;
 
-  const service = serviceSlug ? seedServices.find(s => s.slug === serviceSlug) : null;
-
-  // API key yoxdursa demo cavab
-  if (!process.env.GROQ_API_KEY) {
-    return res.status(200).json({
-      isValid: true,
-      confidence: 85,
-      issues: [],
-      suggestions: ['Demo rejimdə işləyir.'],
-      summary: `"${documentName || 'Sənəd'}" yükləndi. Demo rejimdə tam yoxlama mövcud deyil.`,
-      isDemo: true,
-    });
-  }
-
-  try {
-    const imageBuffer = fs.readFileSync(uploadedFile.filepath);
-    const base64Image = imageBuffer.toString('base64');
-    const mimeType    = uploadedFile.mimetype || 'image/jpeg';
+    if (!process.env.GROQ_API_KEY) {
+      return res.status(200).json({
+        isValid: true,
+        confidence: 85,
+        issues: [],
+        suggestions: ['Demo rejimdə işləyir.'],
+        summary: `"${documentName || 'Sənəd'}" yükləndi. Demo rejimdə tam yoxlama mövcud deyil.`,
+        isDemo: true,
+      });
+    }
 
     const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
     const completion = await groq.chat.completions.create({
@@ -57,7 +37,7 @@ async function handler(req, res) {
         role: 'user',
         content: [
           { type: 'text', text: buildPrompt(documentName, validationRules, service) },
-          { type: 'image_url', image_url: { url: `data:${mimeType};base64,${base64Image}` } },
+          { type: 'image_url', image_url: { url: `data:${mimeType || 'image/jpeg'};base64,${imageBase64}` } },
         ],
       }],
       max_tokens: 1000,
@@ -67,7 +47,7 @@ async function handler(req, res) {
     const content = completion.choices[0].message.content;
     return res.status(200).json(parseResponse(content));
   } catch (err) {
-    console.error('Groq Vision xətası:', err.message);
+    console.error('check-document xətası:', err.message);
     return res.status(500).json({ message: 'Sənəd yoxlanıla bilmədi', error: err.message });
   }
 };
@@ -101,7 +81,3 @@ function parseResponse(content) {
     summary: content,
   };
 }
-
-// Vercel-ə bodyParser-i deaktiv etmə siqnalı
-handler.config = { api: { bodyParser: false } };
-module.exports = handler;

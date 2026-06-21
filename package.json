@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
-    "groq-sdk": "1.2.1",
-    "formidable": "3.5.2"
+    "groq-sdk": "1.2.1"
   }
 }

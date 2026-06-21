@@ -14,14 +14,26 @@ export const chatWithAI = (message, serviceSlug) =>
   api.post('/ai/chat', { message, serviceSlug });
 
 export const checkDocument = (file, documentName, serviceSlug, validationRules) => {
-  const formData = new FormData();
-  formData.append('document', file);
-  formData.append('documentName', documentName);
-  if (serviceSlug)      formData.append('serviceSlug', serviceSlug);
-  if (validationRules)  formData.append('validationRules', validationRules);
-  return api.post('/ai/check-document', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-    timeout: 60000,
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      // base64 data URL-dən yalnız base64 hissəsini al
+      const dataUrl = reader.result;
+      const base64 = dataUrl.split(',')[1];
+      const mimeType = file.type || 'image/jpeg';
+
+      api.post('/ai/check-document', {
+        imageBase64: base64,
+        mimeType,
+        documentName,
+        serviceSlug,
+        validationRules,
+      }, { timeout: 60000 })
+        .then(resolve)
+        .catch(reject);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
   });
 };
 
